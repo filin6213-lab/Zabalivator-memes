@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Забаливатор4000</title>
+<style>
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #05112a;
+    color: white;
+    overflow: hidden;
+    transition: transform 0.1s, background 0.1s;
+}
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    text-align: center;
+}
+#sickBtn {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 10px;
+    background: #cc3333;
+    color: white;
+}
+#healBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+    background: #2a9;
+    border-radius: 15px;
+    border: none;
+    display: none;
+    cursor: pointer;
+    z-index: 100;
+}
+#message { margin-top: 20px; font-size: 2rem; text-align: center; transition: all 0.1s; }
+#tip, #joke, #counter { margin-top: 10px; font-size: 1rem; text-align: center; }
+#tip { color: #ccaa00; }
+#joke { color: #00ccaa; }
+#counter { color: #cc77cc; }
+#deathJoke { margin-top: 20px; font-size: 1.2rem; color: gray; font-family: "Courier New", monospace; }
+
+@keyframes glow {0%,100%{text-shadow:0 0 5px #fff,0 0 10px #ff0;color:#ff0;}50%{text-shadow:0 0 20px #0ff,0 0 30px #0f0;color:#0f0;}}
+@keyframes pulse {0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
+@keyframes shake {0%{transform:translateX(0);}25%{transform:translateX(-5px);}50%{transform:translateX(5px);}75%{transform:translateX(-5px);}100%{transform:translateX(0);}}
+
+#message.glow { animation: glow 0.5s infinite; }
+#sickBtn.pulse { animation: pulse 0.3s infinite; }
+#tip.shake, #joke.shake { animation: shake 0.3s infinite; }
+
+/* Видео-пасхалка снизу вверх */
+#meme67 {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  z-index: 200;
+}
+</style>
+</head>
+<body>
+<h1>Забаливатор4000</h1>
+<button id="sickBtn">Хочу заболеть</button>
+<button id="healBtn">🤒</button>
+<div id="message"></div>
+<div id="tip"></div>
+<div id="joke"></div>
+<div id="counter"></div>
+<div id="deathJoke"></div>
+
+<!-- Видео-пасхалка -->
+<video id="meme67" width="200" autoplay muted>
+  <source src="https://drive.google.com/uc?export=download&id=10xn5Tgisl_vwz_gzbOlnxWH8_7P879IV" type="video/mp4">
+  Ваш браузер не поддерживает видео.
+</video>
+
+<script>
+const button=document.getElementById('sickBtn');
+const healBtn=document.getElementById('healBtn');
+const messageDiv=document.getElementById('message');
+const tipDiv=document.getElementById('tip');
+const jokeDiv=document.getElementById('joke');
+const counterDiv=document.getElementById('counter');
+const deathDiv=document.getElementById('deathJoke');
+const memeVideo = document.getElementById('meme67');
+
+let sicknessCount=0;
+let gameOver=false;
+
+const diseases=[
+"Простуда","Covid-19","Грипп","Ангина","Бронхит","Пневмония","Ветряная оспа","Диарея",
+"Гайморит","Корь","ОРВИ","Отит","Стоматит","Мигрень","Аллергия","Тонзиллит","Гастрит",
+"Язва","Гепатит","Мононуклеоз","Ревматизм","Анемия","Диабет","Туберкулез","Малярия",
+"Краснуха","Скарлатина","Эпидемический паротит","Менингит","Сифилис","ВИЧ","Грипп H1N1",
+"Цистит","Фарингит","Панкреатит","Пневмоторакс","Астма","Псориаз","Экзема","Холера",
+"Дизентерия","Лепра","Полиомиелит","Бешенство","Восполнение хитрости","Я голову дома забыл",
+"Прогул","Уважительная причина","Аппендицит","Стоматологическая боль","Конъюнктивит",
+"Отравление","Бессонница","Псевдококлюш","Невралгия","Аритмия","Синдром ленивого кота",
+"Интернетная простуда","СДВГ тикточество","Ленивая пятница","Социальная усталость","Вечный обед",
+"Прыщи от TikTok","Проблемы с домашкой","Эпидемический мемоз","Фоновая сонливость","Залипание в телефоне",
+"Стресс от смайликов","Невыспанность","Быстрая потеря концентрации","Синдром переписки","Проблемы с тапами",
+"Смехотерапия","Магическая простуда","Рандомная усталость","Синдром громкого уведомления","Перегрев мозга",
+"Вечная зевота","Резкий перепад настроения","Интернетная зависимость","Вирус мемов","Хроническая прокрастинация",
+"Синдром двойного тапка","Проблемы с Wi-Fi","Синдром мемного глаза","Постоянное отвлечение","СДВГ многозадачность",
+"Синдром TikTok-комента","Эпидемическая сонливость","Рандомная энергия","Кофейная зависимость","Психоанализ из TikTok",
+"Синдром залипания","Эпидемический флешмоб","СДВГ мышление","Мемная усталость","Синдром лайкания",
+"Синдром бесконечных видео","Хроническая TikTok-зависимость","Рандомная радость","Эпидемический креатив",
+"Синдром бесконечных свайпов","СДВГ уведомления","Вирус случайных идей"
+];
+
+const deathJokes=[
+"Вот и сказачке конец!","Не долго музыка играла",
+"Папа едет в Волгоград папа купит мармелад",
+"Папа едет Волгоград папа купит мне мопед",
+"Папа едет Волгоград мамин ебр будет рад мамин ебр наш сосед папа купит мне мопед!",
+"папа едет fogоград папа купит мне glaza"
+];
+
+const simpleJokes=[
+"67","SiX sEvEn","Субо братик мой субашичь",
+"О братик ты че тоже здесь? На переменах залипаю по страшному",
+"Кто то помнит 42?"
+];
+
+const tips=[
+"Попейте горячий чай!","Лягте отдохнуть на 20 минут.","Витамин C — ваш друг!",
+"Не забывайте проветривать комнату.","Слушайте любимую музыку.","Сделайте 5 глубоких вдохов",
+"Пройдитесь по комнате","Сделайте растяжку","Послушайте любимый трек"
+];
+
+function getSick(){
+    if(gameOver) return;
+    if(Math.random()<0.003){ triggerDeath(); return; } 
+    const disease=diseases[Math.floor(Math.random()*diseases.length)];
+    messageDiv.textContent=disease;
+    healBtn.style.display="inline";
+    applyVisualEffects();
+    randomTip();
+    if(Math.random()<0.3) randomSimpleJoke();
+    sicknessCounter();
+    randomizeButtonText();
+}
+
+function startRecoveryTimer(){
+    let time=5+Math.floor(Math.random()*10);
+    counterDiv.textContent="Выздоровление через: "+time+" сек";
+    let timer=setInterval(()=>{
+        time--;
+        counterDiv.textContent="Выздоровление через: "+time+" сек";
+        if(time<=0){
+            clearInterval(timer);
+            counterDiv.textContent="Вы выздоровели!";
+            messageDiv.textContent="";
+            tipDiv.textContent="";
+            jokeDiv.textContent="";
+            healBtn.style.display="none";
+            removeVisualEffects();
+        }
+    },1000);
+}
+
+function triggerDeath(){
+    gameOver=true;
+    document.body.style.background="#000";
+    button.style.background="#555";
+    button.style.cursor="not-allowed";
+    button.disabled=true;
+    button.textContent="Ты Мёртв! 💀";
+    healBtn.style.display="none";
+    messageDiv.textContent="Вы Умерли! Перезапустите Забаливатор4000!";
+    tipDiv.textContent="";
+    jokeDiv.textContent="";
+    counterDiv.textContent="";
+    deathDiv.textContent=deathJokes[Math.floor(Math.random()*deathJokes.length)];
+    removeVisualEffects();
+}
+
+function randomTip(){
+    tipDiv.textContent=tips[Math.floor(Math.random()*tips.length)];
+}
+
+function randomSimpleJoke(){
+    jokeDiv.textContent=simpleJokes[Math.floor(Math.random()*simpleJokes.length)];
+}
+
+function sicknessCounter(){
+    sicknessCount++;
+    counterDiv.textContent=`Вы заболели уже ${sicknessCount} раз(а).`;
+
+    if(sicknessCount === 67){
+        document.body.style.background = "#000";
+        memeVideo.style.display = 'block';
+        memeVideo.style.bottom = '-100px';
+        let pos = -100;
+        const interval = setInterval(() => {
+            pos += 5;
+            memeVideo.style.bottom = pos + "px";
+            if(pos >= window.innerHeight){
+                clearInterval(interval);
+                memeVideo.style.display = 'none';
+                document.body.style.background = "#05112a";
+            }
+        }, 20);
+    }
+}
+
+function randomizeButtonText(){
+    const texts=["Хочу заболеть","Опять болею","Бросаюсь в болезни","Эпидемия ждёт!"];
+    button.textContent=texts[Math.floor(Math.random()*texts.length)];
+}
+
+function applyVisualEffects(){
+    messageDiv.classList.add('glow');
+    button.classList.add('pulse');
+    tipDiv.classList.add('shake');
+    jokeDiv.classList.add('shake');
+    const colors=["#660000","#663300","#666600","#006600","#000066","#330066","#550066"];
+    document.body.style.background=colors[Math.floor(Math.random()*colors.length)];
+    document.body.style.transform="rotate(10deg)";
+    setTimeout(()=>{document.body.style.transform="rotate(0deg)"; document.body.style.background="#05112a";},100);
+}
+
+function removeVisualEffects(){
+    messageDiv.classList.remove('glow');
+    button.classList.remove('pulse');
+    tipDiv.classList.remove('shake');
+    jokeDiv.classList.remove('shake');
+    document.body.style.background="#05112a";
+    document.body.style.transform="rotate(0deg)";
+}
+
+button.addEventListener('touchstart',getSick);
+healBtn.addEventListener('touchstart',startRecoveryTimer);
+</script>
+</body>
+</html>
