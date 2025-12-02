@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Забаливатор4000</title>
+
+<style>
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 300;
+    background: #000;
+    color: white;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.15s ease;
+}
+
+.container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    text-align: center;
+    position: relative;
+    color: #ff006e;
+    text-shadow: 0 0 10px rgba(255, 0, 110, 0.5);
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+/* СТЕКЛЯННЫЙ ЭФФЕКТ ДЛЯ КНОПОК */
+#sickBtn {
+    padding: 20px 40px;
+    font-size: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 15px;
+    cursor: pointer;
+    margin: 10px;
+    background: rgba(204, 51, 51, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    position: relative;
+    box-shadow: 0 8px 32px 0 rgba(204, 51, 51, 0.37);
+    font-weight: 300;
+    touch-action: manipulation;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#sickBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+    border-radius: 15px 15px 0 0;
+    pointer-events: none;
+}
+
+#sickBtn:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 16px 0 rgba(204, 51, 51, 0.37);
+}
+
+#healBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+    background: rgba(42, 170, 153, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    display: none;
+    cursor: pointer;
+    z-index: 11;
+    box-shadow: 0 8px 32px 0 rgba(42, 170, 153, 0.37);
+    touch-action: manipulation;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+#healBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+#healBtn:active {
+    transform: scale(0.9);
+}
+
+#message, #tip, #joke, #counter, #deathJoke {
+    position: relative;
+    text-align: center;
+    margin: 8px 0;
+    font-weight: 300;
+}
+
+#message { 
+    font-size: 2.5rem; 
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+#tip { 
+    font-size: 1.1rem; 
+    color: #ffdd44;
+    padding: 8px 15px;
+    background: rgba(255,221,68,0.2);
+    border-radius: 10px;
+}
+
+#joke { 
+    font-size: 1.1rem; 
+    color: #00ffcc;
+    padding: 8px 15px;
+    background: rgba(0,255,204,0.2);
+    border-radius: 10px;
+}
+
+#counter { 
+    font-size: 1.1rem; 
+    color: #dd77ff;
+    padding: 8px 15px;
+    background: rgba(221,119,255,0.2);
+    border-radius: 10px;
+}
+
+#deathJoke { 
+    font-size: 1.3rem; 
+    color: #ff4444;
+}
+
+/* Эффекты */
+@keyframes glow {
+    0%, 100% { color: #ff0; text-shadow: 0 0 10px #ff0; transform: scale(1); }
+    50% { color: #0f0; text-shadow: 0 0 15px #0f0; transform: scale(1.05); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes borderGlow {
+    0%, 100% { box-shadow: 0 8px 32px 0 rgba(204, 51, 51, 0.37); }
+    50% { box-shadow: 0 8px 32px 0 rgba(255, 107, 107, 0.6); }
+}
+
+#message.glow { animation: glow 0.5s 3; }
+#sickBtn.pulse { animation: pulse 0.3s 3, borderGlow 0.6s 3; }
+#tip.shake { animation: shake 0.2s 3; }
+#joke.shake { animation: shake 0.2s 3; }
+
+.fadeIn { animation: fadeIn 0.4s ease-out; }
+
+/* Видео */
+.videoLayer {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.9;
+}
+
+#video42 { bottom: -120px; }
+#video67 { bottom: -120px; }
+#video149{ top: 30px; }
+#video333 { bottom: -130px; }
+#video456 { top: 30px; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Забаливатор4000</h1>
+
+<button id="sickBtn">Хочу заболеть</button>
+
+<div id="message"></div>
+<div id="tip"></div>
+<div id="joke"></div>
+<div id="counter"></div>
+<div id="deathJoke"></div>
+</div>
+
+<button id="healBtn">🤒</button>
+
+<!-- ВИДЕО ПАСХАЛКИ -->
+<video id="video42" class="videoLayer" width="220" autoplay playsinline>
+  <source src="https://github.com/filin6213-lab/Zabalivator-memes/raw/refs/heads/main/video_20251201_205930.mp4" type="video/mp4">
+</video>
+
+<video id="video67" class="videoLayer" width="220" autoplay muted>
+  <source src="https://github.com/filin6213-lab/Zabalivator-memes/raw/refs/heads/main/2025-12-01-202815693.mp4" type="video/mp4">
+</video>
+
+<video id="video149" class="videoLayer" width="220" loop autoplay muted>
+  <source src="https://github.com/filin6213-lab/Zabalivator-memes/raw/refs/heads/main/qotaqbas.ss_2025-12-01-20-58-24_1764597504856.mp4" type="video/mp4">
+</video>
+
+<video id="video333" class="videoLayer" width="220" autoplay muted>
+  <source src="https://github.com/filin6213-lab/Zabalivator-memes/raw/refs/heads/main/video_20251201_212347.mp4" type="video/mp4">
+</video>
+
+<video id="video456" class="videoLayer" width="220" loop autoplay playsinline>
+  <source src="https://github.com/filin6213-lab/Zabalivator-memes/raw/refs/heads/main/mangolik.__2025-12-01-21-28-47_1764599327045.mp4" type="video/mp4">
+</video>
+
+
+<script>
+const button=document.getElementById("sickBtn");
+const healBtn=document.getElementById("healBtn");
+const messageDiv=document.getElementById("message");
+const tipDiv=document.getElementById("tip");
+const jokeDiv=document.getElementById("joke");
+const counterDiv=document.getElementById("counter");
+const deathDiv=document.getElementById("deathJoke");
+
+const video42=document.getElementById("video42");
+const video67=document.getElementById("video67");
+const video149=document.getElementById("video149");
+const video333=document.getElementById("video333");
+const video456=document.getElementById("video456");
+
+let sicknessCount=0;
+let gameOver=false;
+let video149Playing=false;
+let video456Playing=false;
+
+const diseases=["Простуда","Covid-19","Грипп","Ангина","Бронхит","Пневмония","Ветряная оспа","Диарея","Гайморит","Корь","ОРВИ","Отит","Стоматит","Мигрень","Аллергия",
+"Тонзиллит","Гастрит","Язва","Гепатит","Мононуклеоз","Ревматизм","Анемия","Диабет","Туберкулез","Малярия","Краснуха","Скарлатина","Паротит","Менингит",
+"Сифилис","Грипп H1N1","Цистит","Фарингит","Панкреатит","Пневмоторакс","Астма","Псориаз","Экзема","Холера","Дизентерия","Лепра","Полиомиелит","Бешенство",
+"Восполнение хитрости","Я голову дома забыл","Прогул","Уважительная причина","Кофейная зависимость","Синдром двойного тапка","Хроническая скука","Синдром TikTok-комента",
+"Интернетная усталость","Бессонница","Синдром мемного глаза","Проблемы с Wi-Fi","Синдром бесконечных свайпов","Рандомная энергия","Вирус мемов","Эпидемический флешмоб",
+"СДВГ тикточество","Хроническая прокрастинация","Эпидемический мемоз","Интернетная зависимость","Перегрев мозга","Синдром уведомлений","Прыщи от TikTok",
+"Проблемы с домашкой","Эпидемическая сонливость","Невыспанность","Стресс от смайликов","Потеря концентрации","Вечный обед","Социальная усталость","Магическая простуда"];
+
+const tips=["Попейте чай","Проветрите комнату","Отдохните","Глубоко вдохните","Растянитесь","Пройдитесь","Выпей воды"];
+const simpleJokes=["67","SiX sEvEn","Субо братик","Ты че тоже здесь?","Кто помнит 42?"];
+
+// ЭФФЕКТ НАЖАТИЯ ПО ЭКРАНУ
+document.body.addEventListener('touchstart', function(e) {
+    if(e.target === button || e.target === healBtn) return;
+    createTapEffect(e.touches[0].clientX, e.touches[0].clientY);
+}, {passive: true});
+
+document.body.addEventListener('click', function(e) {
+    if(e.target === button || e.target === healBtn) return;
+    createTapEffect(e.clientX, e.clientY);
+});
+
+function createTapEffect(x, y) {
+    const ripple = document.createElement('div');
+    ripple.style.cssText = `
+        position: fixed;
+        top: ${y}px;
+        left: ${x}px;
+        width: 10px;
+        height: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        pointer-events: none;
+    `;
+    document.body.appendChild(ripple);
+    
+    let size = 10;
+    let opacity = 0.6;
+    
+    const animate = () => {
+        size += 6;
+        opacity -= 0.04;
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.opacity = opacity;
+        
+        if (opacity > 0) {
+            requestAnimationFrame(animate);
+        } else {
+            ripple.remove();
+        }
+    };
+    requestAnimationFrame(animate);
+}
+
+function getSick(){
+    if(gameOver) return;
+
+    if(Math.random()<0.003){
+        triggerDeath();
+        return;
+    }
+
+    // СНИЖЕНА ВЕРОЯТНОСТЬ ЗДОРОВЬЯ: 20% -> 8%
+    if(Math.random()<0.08){
+        document.body.style.background="#003300";
+        messageDiv.textContent="Ты не заболел!";
+        messageDiv.style.color = "#00ff00";
+        messageDiv.style.textShadow = "0 0 20px #00ff00";
+        messageDiv.classList.add("fadeIn");
+        healBtn.style.display="none";
+        tipDiv.textContent="";
+        jokeDiv.textContent="";
+        counterDiv.textContent="";
+        createConfetti(15);
+        return;
+    }
+
+    document.body.style.background="#000";
+    messageDiv.style.color = "white";
+    messageDiv.style.textShadow = "";
+
+    const disease=diseases[Math.floor(Math.random()*diseases.length)];
+    messageDiv.textContent=disease;
+    messageDiv.classList.add("fadeIn");
+
+    applyVisualEffects();
+    healBtn.style.display="inline";
+
+    if(Math.random()<0.3) {
+        jokeDiv.textContent=simpleJokes[Math.floor(Math.random()*simpleJokes.length)];
+        jokeDiv.classList.add("fadeIn");
+    } else {
+        jokeDiv.textContent="";
+    }
+    tipDiv.textContent=tips[Math.floor(Math.random()*tips.length)];
+    tipDiv.classList.add("fadeIn");
+
+    sicknessCounter();
+}
+
+// ОПТИМИЗИРОВАННОЕ КОНФЕТТИ
+function createConfetti(count) {
+    const buttonRect = button.getBoundingClientRect();
+    const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+    
+    for(let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            const hue = Math.random() * 360;
+            const left = Math.random() * 100;
+            
+            confetti.style.cssText = `
+                position: fixed;
+                width: 8px;
+                height: 8px;
+                background: hsl(${hue}, 100%, 60%);
+                top: -10px;
+                left: ${left}%;
+                z-index: 12;
+                border-radius: 50%;
+                pointer-events: none;
+            `;
+            document.body.appendChild(confetti);
+            
+            let y = -10, opacity = 1;
+            const speed = 3 + Math.random() * 2;
+            
+            const animate = () => {
+                y += speed;
+                opacity -= (Math.abs(y - buttonCenterY) < 100) ? 0.05 : 0.015;
+                
+                confetti.style.transform = `translateY(${y}px) rotate(${y * 2}deg)`;
+                confetti.style.opacity = opacity;
+                
+                if (opacity > 0 && y < window.innerHeight) {
+                    requestAnimationFrame(animate);
+                } else {
+                    confetti.remove();
+                }
+            };
+            requestAnimationFrame(animate);
+        }, i * 30);
+    }
+}
+
+function sicknessCounter(){
+    sicknessCount++;
+    counterDiv.textContent="Вы заболели уже "+sicknessCount+" раз.";
+    counterDiv.classList.add("fadeIn");
+
+    if(sicknessCount===42) playVideo(video42,true);
+    if(sicknessCount===67) playVideo(video67,false);
+    if(sicknessCount===333) playVideo(video333,false);
+
+    if(sicknessCount===149){
+        video149.style.display="block";
+        video149Playing=true;
+        return;
+    }
+
+    if(video149Playing){
+        video149.style.display="none";
+        video149Playing=false;
+    }
+
+    if(sicknessCount===456){
+        video456.style.display="block";
+        video456Playing=true;
+        video456.play();
+        return;
+    }
+
+    if(video456Playing){
+        video456.style.display="none";
+        video456Playing=false;
+    }
+}
+
+function playVideo(videoElement,withSound){
+    videoElement.style.display="block";
+    let pos=-120;
+    const interval=setInterval(()=>{
+        pos+=4;
+        videoElement.style.bottom=pos+"px";
+        if(pos>window.innerHeight){
+            clearInterval(interval);
+            videoElement.style.display="none";
+        }
+    },20);
+    if(withSound) videoElement.play();
+}
+
+function applyVisualEffects(){
+    messageDiv.classList.remove("glow", "fadeIn");
+    button.classList.remove("pulse");
+    tipDiv.classList.remove("shake", "fadeIn");
+    jokeDiv.classList.remove("shake", "fadeIn");
+    counterDiv.classList.remove("fadeIn");
+    
+    setTimeout(()=>{
+        messageDiv.classList.add("glow");
+        button.classList.add("pulse");
+        tipDiv.classList.add("shake");
+        jokeDiv.classList.add("shake");
+    }, 10);
+    
+    document.body.style.transform="rotate(8deg)";
+    setTimeout(()=>{ document.body.style.transform="rotate(-8deg)"; }, 100);
+    setTimeout(()=>{ document.body.style.transform="rotate(0deg)"; }, 200);
+    
+    document.body.style.background="radial-gradient(circle, #440044 0%, #000 100%)";
+    setTimeout(()=>{ document.body.style.background="#000"; }, 150);
+    
+    createRipple();
+}
+
+function createRipple() {
+    const rect = button.getBoundingClientRect();
+    const ripple = document.createElement('div');
+    
+    ripple.style.cssText = `
+        position: fixed;
+        top: ${rect.top + rect.height/2}px;
+        left: ${rect.left + rect.width/2}px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ff6b6b;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        pointer-events: none;
+    `;
+    document.body.appendChild(ripple);
+    
+    let size = 20, opacity = 1;
+    
+    const animate = () => {
+        size += 8;
+        opacity -= 0.05;
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.opacity = opacity;
+        
+        if (opacity > 0) {
+            requestAnimationFrame(animate);
+        } else {
+            ripple.remove();
+        }
+    };
+    requestAnimationFrame(animate);
+}
+
+function startRecoveryTimer(){
+    let t=4;
+    counterDiv.textContent="Выздоровление через "+t+" сек";
+    counterDiv.classList.add("fadeIn");
+    
+    let int=setInterval(()=>{
+        t--;
+        counterDiv.textContent="Выздоровление через "+t+" сек";
+        if(t<=0){
+            clearInterval(int);
+            messageDiv.textContent="";
+            tipDiv.textContent="";
+            jokeDiv.textContent="";
+            counterDiv.textContent="Вы выздоровели!";
+            counterDiv.classList.add("fadeIn");
+            healBtn.style.display="none";
+            document.body.style.background="#003300";
+            
+            messageDiv.classList.remove("glow");
+            button.classList.remove("pulse");
+            tipDiv.classList.remove("shake");
+            jokeDiv.classList.remove("shake");
+            
+            healEffect();
+        }
+    },1000);
+}
+
+function healEffect() {
+    const glow = document.createElement('div');
+    glow.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(0,255,0,0.6) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        z-index: 9;
+        pointer-events: none;
+    `;
+    document.body.appendChild(glow);
+    
+    let size = 100, opacity = 0.6;
+    
+    const animate = () => {
+        size += 10;
+        opacity -= 0.03;
+        glow.style.width = size + 'px';
+        glow.style.height = size + 'px';
+        glow.style.opacity = opacity;
+        
+        if (opacity > 0) {
+            requestAnimationFrame(animate);
+        } else {
+            glow.remove();
+        }
+    };
+    requestAnimationFrame(animate);
+}
+
+function triggerDeath(){
+    gameOver=true;
+    document.body.style.background="#1a0000";
+    button.textContent="Ты Мёртв! 💀";
+    button.style.background="rgba(68, 68, 68, 0.7)";
+    button.disabled=true;
+    healBtn.style.display="none";
+    messageDiv.textContent="Вы Умерли! Перезапустите Забаливатор4000!";
+    messageDiv.classList.add("fadeIn");
+    deathDiv.textContent="Вот и сказачке конец!";
+    
+    messageDiv.classList.remove("glow");
+    button.classList.remove("pulse");
+    tipDiv.classList.remove("shake");
+    jokeDiv.classList.remove("shake");
+    
+    deathEffect();
+}
+
+function deathEffect() {
+    for(let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const wave = document.createElement('div');
+            wave.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 50px;
+                height: 50px;
+                border: 3px solid #ff0000;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 9;
+                pointer-events: none;
+            `;
+            document.body.appendChild(wave);
+            
+            let size = 50, opacity = 1;
+            
+            const animate = () => {
+                size += 15;
+                opacity -= 0.04;
+                wave.style.width = size + 'px';
+                wave.style.height = size + 'px';
+                wave.style.opacity = opacity;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    wave.remove();
+                }
+            };
+            requestAnimationFrame(animate);
+        }, i * 200);
+    }
+}
+
+button.addEventListener("touchstart",(e)=>{
+    e.preventDefault();
+    getSick();
+});
+button.addEventListener("click",getSick);
+
+healBtn.addEventListener("touchstart",(e)=>{
+    e.preventDefault();
+    startRecoveryTimer();
+});
+healBtn.addEventListener("click",startRecoveryTimer);
+</script>
+</body>
+</html>,
