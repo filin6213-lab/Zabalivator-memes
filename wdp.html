@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows ISO Downloader Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(180deg, #2c5f8d 0%, #1a3a52 50%, #0d1f2d 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(100, 180, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .skeuomorphic-card {
+            background: linear-gradient(145deg, #f0f4f8 0%, #d9e2ec 100%);
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 8px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .skeuomorphic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+            border-radius: 24px 24px 0 0;
+            pointer-events: none;
+        }
+        
+        .skeuomorphic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 25px 70px rgba(0, 0, 0, 0.35),
+                0 10px 25px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .skeuomorphic-button {
+            background: linear-gradient(180deg, #4a90e2 0%, #357abd 50%, #2868ab 100%);
+            border-radius: 12px;
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                0 1px 2px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .skeuomorphic-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .skeuomorphic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.35),
+                0 2px 4px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #5ba0f2 0%, #4080cd 50%, #3078bb 100%);
+        }
+        
+        .skeuomorphic-button:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #357abd 0%, #2868ab 50%, #1f5899 100%);
+        }
+        
+        .skeuomorphic-button.downloading {
+            background: linear-gradient(180deg, #7c7c7c 0%, #5a5a5a 50%, #484848 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        
+        .section-icon-wrapper {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(145deg, #ffffff 0%, #e8eef5 100%);
+            border-radius: 18px;
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+        
+        .section-icon-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+            border-radius: 18px 18px 0 0;
+        }
+        
+        .item-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f5f8fb 100%);
+            border-radius: 16px;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+            border-radius: 16px 16px 0 0;
+            pointer-events: none;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        
+        .copy-button {
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #ea8b07 100%);
+            border-radius: 12px;
+            box-shadow: 
+                0 4px 8px rgba(251, 146, 60, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .copy-button:hover {
+            background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%);
+            box-shadow: 
+                0 6px 12px rgba(251, 146, 60, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .copy-button:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 4px rgba(251, 146, 60, 0.4),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .title-3d {
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(0, 0, 0, 0.2),
+                0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        
+        code {
+            background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+        .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+        .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+        .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+        
+        .header-emboss {
+            background: linear-gradient(145deg, #e8eef5 0%, #d0dae6 100%);
+            border-radius: 32px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Header -->
+        <div class="header-emboss p-8 md:p-12 mb-12 fade-in-up">
+            <h1 class="text-5xl md:text-7xl font-extrabold text-gray-800 mb-4 title-3d text-center">
+                Windows ISO Downloader
+            </h1>
+            <p class="text-xl text-gray-700 font-semibold text-center">
+                ✨ Официальные образы Windows, Office и инструменты ✨
+            </p>
+        </div>
+
+        <!-- Windows Section -->
+        <div class="skeuomorphic-card p-6 md:p-8 mb-8 fade-in-up stagger-1">
+            <div class="flex items-center gap-5 mb-6 relative z-10">
+                <div class="section-icon-wrapper">
+                    <svg class="text-blue-600 relative z-10" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8M12 17v4"/>
+                    </svg>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 title-3d">Windows</h2>
+            </div>
+            <div id="windows-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10"></div>
+        </div>
+
+        <!-- Office Section -->
+        <div class="skeuomorphic-card p-6 md:p-8 mb-8 fade-in-up stagger-2">
+            <div class="flex items-center gap-5 mb-6 relative z-10">
+                <div class="section-icon-wrapper">
+                    <svg class="text-orange-600 relative z-10" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                    </svg>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 title-3d">Microsoft Office</h2>
+            </div>
+            <div id="office-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10"></div>
+        </div>
+
+        <!-- Tools Section -->
+        <div class="skeuomorphic-card p-6 md:p-8 mb-8 fade-in-up stagger-3">
+            <div class="flex items-center gap-5 mb-6 relative z-10">
+                <div class="section-icon-wrapper">
+                    <svg class="text-green-600 relative z-10" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <rect x="7" y="7" width="14" height="14" rx="2"/>
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 title-3d">Rufus</h2>
+            </div>
+            <div id="tools-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10"></div>
+        </div>
+
+        <!-- Activation Section -->
+        <div class="skeuomorphic-card p-6 md:p-8 mb-8 fade-in-up stagger-4">
+            <div class="flex items-center gap-5 mb-6 relative z-10">
+                <div class="section-icon-wrapper">
+                    <svg class="text-purple-600 relative z-10" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 title-3d">Активация</h2>
+            </div>
+            <div id="activation-list" class="space-y-4 relative z-10"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-white/90 text-sm space-y-3 mb-8 font-semibold text-shadow">
+            <p class="text-lg">⚠️ Все образы официальные от Microsoft</p>
+            <p>💡 Используйте Rufus для создания загрузочной флешки</p>
+        </div>
+    </div>
+
+    <script>
+        const downloads = {
+            windows: [
+                { name: 'Windows 7 Ultimate SP1 (x64)', url: 'https://drive.massgrave.dev/ru_windows_7_ultimate_with_sp1_x64_dvd_u_677391.iso', size: '3.1 GB' },
+                { name: 'Windows 8 (x64)', url: 'https://drive.massgrave.dev/ru_windows_8_x64_dvd_915419.iso', size: '3.3 GB' },
+                { name: 'Windows 8.1 with Update (x64)', url: 'https://drive.massgrave.dev/ru_windows_8.1_with_update_x64_dvd_6051499.iso', size: '4.0 GB' },
+                { name: 'Windows 10 1507 (RTM Build 10240)', url: 'https://drive.massgrave.dev/ru_windows_10_multiple_editions_x64_dvd_6846887.iso', size: '3.8 GB' },
+                { name: 'Windows 10 1511 (November Update)', url: 'https://drive.massgrave.dev/ru_windows_10_multiple_editions_version_1511_x64_dvd_8712460.iso', size: '3.9 GB' },
+                { name: 'Windows 10 1607 (Anniversary Update)', url: 'https://drive.massgrave.dev/ru_windows_10_multiple_editions_version_1607_updated_jul_2016_x64_dvd_9055880.iso', size: '4.2 GB' },
+                { name: 'Windows 10 1703 (Creators Update)', url: 'https://drive.massgrave.dev/ru_windows_10_multiple_editions_version_1703_updated_march_2017_x64_dvd_10189252.iso', size: '4.4 GB' },
+                { name: 'Windows 10 1709 (Fall Creators Update)', url: 'https://drive.massgrave.dev/ru_windows_10_consumer_editions_version_1709_updated_sept_2017_x64_dvd_100090774.iso', size: '4.6 GB' },
+                { name: 'Windows 10 1803 (April 2018 Update)', url: 'https://drive.massgrave.dev/ru_windows_10_consumer_editions_version_1803_updated_march_2018_x64_dvd_12063379.iso', size: '4.7 GB' },
+                { name: 'Windows 10 1809 (October 2018 Update)', url: 'https://drive.massgrave.dev/ru_windows_10_consumer_editions_version_1809_updated_sept_2018_x64_dvd_f69d9c8f.iso', size: '4.8 GB' },
+                { name: 'Windows 10 1903 (May 2019 Update)', url: 'https://drive.massgrave.dev/ru_windows_10_consumer_editions_version_1903_x64_dvd_1e7bf9cd.iso', size: '4.9 GB' },
+                { name: 'Windows 10 1909 (November 2019 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_1909_x64_dvd_dc57f6a7.iso', size: '5.0 GB' },
+                { name: 'Windows 10 2004 (May 2020 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_2004_x64_dvd_62b2bc2c.iso', size: '5.2 GB' },
+                { name: 'Windows 10 20H2 (October 2020 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_20h2_x64_dvd_5c87fcb9.iso', size: '5.3 GB' },
+                { name: 'Windows 10 21H1 (May 2021 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_21h1_x64_dvd_b01face2.iso', size: '5.3 GB' },
+                { name: 'Windows 10 21H2 (November 2021 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_21h2_updated_nov_2021_x64_dvd_c5fed501.iso', size: '5.4 GB' },
+                { name: 'Windows 10 22H2 (2022 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso', size: '5.7 GB' },
+                { name: 'Windows 11 21H2 (Original Release)', url: 'https://drive.massgrave.dev/ru-ru_windows_11_consumer_editions_version_21h2_x64_dvd_8e6c9ec8.iso', size: '5.1 GB' },
+                { name: 'Windows 11 22H2 (2022 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_11_consumer_editions_version_22h2_updated_oct_2023_x64_dvd_6f4af0a9.iso', size: '5.4 GB' },
+                { name: 'Windows 11 23H2 (2023 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_11_consumer_editions_version_23h2_updated_nov_2024_x64_dvd_2dbc7d2e.iso', size: '5.6 GB' },
+                { name: 'Windows 11 24H2 (2024 Update)', url: 'https://drive.massgrave.dev/ru-ru_windows_11_consumer_editions_version_24h2_x64_dvd_5ecf6e83.iso', size: '5.7 GB' },
+                { name: 'Windows 11 25H2 (Build 26200)', url: 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_ru-ru.iso', size: '5.8 GB' }
+            ],
+            office: [
+                { name: 'Office 2010 Professional Plus SP1', url: 'https://drive.massgrave.dev/SW_DVD5_Office_Professional_Plus_2010w_SP1_64Bit_Russian_CORE_MLF_X17-77007.iso', size: '813 MB' },
+                { name: 'Office 2013 Professional Plus', url: 'https://drive.massgrave.dev/SW_DVD5_Office_Professional_Plus_2013w_SP1_64Bit_Russian_MLF_X19-35946.iso', size: '849 MB' },
+                { name: 'Office 2016 Professional Plus', url: 'https://drive.massgrave.dev/SW_DVD5_Office_Professional_Plus_2016_64Bit_Russian_MLF_X20-42426.iso', size: '1.2 GB' },
+                { name: 'Office 2019 Professional Plus', url: 'https://drive.massgrave.dev/SW_DVD5_Office_Professional_Plus_2019_64Bit_Russian_MLF_X22-22278.iso', size: '3.0 GB' },
+                { name: 'Office 2021 Professional Plus', url: 'https://drive.massgrave.dev/SW_DVD9_Office_Professional_Plus_2021_64Bit_Russian_MLF_X22-97572.iso', size: '3.6 GB' }
+            ],
+            tools: [
+                { name: 'Rufus 4.11 (Win 8-11)', url: 'https://github.com/pbatard/rufus/releases/download/v4.11/rufus-4.11.exe', size: '1.4 MB', desc: 'Для Windows 8-11' },
+                { name: 'Rufus 4.3 (Win 7)', url: 'https://github.com/pbatard/rufus/releases/download/v4.3/rufus-4.3.exe', size: '1.3 MB', desc: 'Для Windows 7' }
+            ],
+            activation: [
+                { name: 'Windows/Office (Win 8-11)', command: 'irm https://get.activated.win | iex', desc: '💻 PowerShell от администратора' },
+                { name: 'Windows (Win 7)', command: 'iex ((New-Object Net.WebClient).DownloadString(\'https://get.activated.win\'))', desc: '💻 PowerShell от администратора' }
+            ]
+        };
+
+        function createDownloadButton(url, name) {
+            const btn = document.createElement('button');
+            btn.className = 'skeuomorphic-button text-white font-bold px-6 py-3 rounded-xl whitespace-nowrap relative';
+            btn.innerHTML = `
+                <span class="relative z-10 flex items-center gap-2">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    <span class="btn-text">Скачать</span>
+                </span>
+            `;
+            btn.onclick = function() {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.classList.add('downloading');
+                this.querySelector('.btn-text').textContent = 'Загрузка...';
+                setTimeout(() => {
+                    this.classList.remove('downloading');
+                    this.querySelector('.btn-text').textContent = 'Скачать';
+                }, 2000);
+            };
+            return btn;
+        }
+
+        // Render Windows
+        downloads.windows.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-card p-5';
+            div.innerHTML = `
+                <div class="flex justify-between items-start gap-4 relative z-10">
+                    <div class="flex-1">
+                        <h3 class="text-gray-800 font-bold text-lg mb-1">${item.name}</h3>
+                        <p class="text-gray-600 font-semibold text-sm">${item.size}</p>
+                    </div>
+                </div>
+            `;
+            div.querySelector('.flex').appendChild(createDownloadButton(item.url, item.name));
+            document.getElementById('tools-list').appendChild(div);
+        });
+
+        // Render Activation
+        downloads.activation.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-card p-5';
+            div.innerHTML = `
+                <div class="relative z-10">
+                    <h3 class="text-gray-800 font-bold text-lg mb-2">${item.name}</h3>
+                    <p class="text-gray-600 font-semibold text-sm mb-4">${item.desc}</p>
+                    <div class="flex gap-3 items-start flex-wrap">
+                        <code class="flex-1 text-green-400 text-sm p-4 rounded-xl break-all font-mono min-w-0">${item.command}</code>
+                        <button class="copy-button text-gray-900 font-bold px-5 py-3 rounded-xl transition-all whitespace-nowrap">
+                            Копировать
+                        </button>
+                    </div>
+                </div>
+            `;
+            div.querySelector('.copy-button').onclick = function() {
+                navigator.clipboard.writeText(item.command);
+                this.textContent = '✓ Скопировано!';
+                setTimeout(() => this.textContent = 'Копировать', 1500);
+            };
+            document.getElementById('activation-list').appendChild(div);
+        });
+    </script>
+</body>
+</html>d('windows-list').appendChild(div);
+        });
+
+        // Render Office
+        downloads.office.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-card p-5';
+            div.innerHTML = `
+                <div class="flex justify-between items-start gap-4 relative z-10">
+                    <div class="flex-1">
+                        <h3 class="text-gray-800 font-bold text-lg mb-1">${item.name}</h3>
+                        <p class="text-gray-600 font-semibold text-sm">${item.size}</p>
+                    </div>
+                </div>
+            `;
+            div.querySelector('.flex').appendChild(createDownloadButton(item.url, item.name));
+            document.getElementById('office-list').appendChild(div);
+        });
+
+        // Render Tools
+        downloads.tools.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-card p-5';
+            div.innerHTML = `
+                <div class="flex justify-between items-start gap-4 relative z-10">
+                    <div class="flex-1">
+                        <h3 class="text-gray-800 font-bold text-lg mb-1">${item.name}</h3>
+                        <p class="text-gray-600 text-sm">${item.desc}</p>
+                        <p class="text-gray-500 text-xs mt-1 font-semibold">${item.size}</p>
+                    </div>
+                </div>
+            `;
+            div.querySelector('.flex').appendChild(createDownloadButton(item.url, item.name));
+            document.getElementByI
